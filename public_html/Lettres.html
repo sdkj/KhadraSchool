@@ -1,0 +1,128 @@
+<!--
+The MIT License (MIT)
+
+Copyright (c) [2016] [Jean-Michel Depaepe]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lettres</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .sdkj-draggable { 
+                padding: 0 0.1em;
+                margin: 5px 0 0 0;
+                border: 1px solid #CCC;
+                font-size: 3em;
+                display: inline-block;
+            }
+            .sdkj-dragplace {
+                height: 500px;
+                max-width: 800px;
+                padding: 5px 5px 20px 5px;
+                border: 1px crimson dotted;
+            }
+            section {
+                margin: 20px auto;
+            }
+            button {
+                font-size: 1.5em;
+                font-family: 'verdana';
+                padding: 10px;
+                border-radius: 25px;
+                background:  bisque;
+                display: block;
+                margin: auto;
+            }
+        </style>
+        <script src="//code.jquery.com/jquery-1.11.3.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        <script>
+            var sdkj = {};
+            sdkj.color = RandomColor();
+            $(function () {
+                $("body").keyup(function (event) {
+                    console.log(event.keyCode);
+                    switch (event.keyCode) {
+                        case 27:    // escape char => reset
+                            $("#game").empty();
+                            break;
+                        case 32:    // space => change color
+                            sdkj.color = "#FFFFFF";
+                            var char = String.fromCharCode(event.keyCode);
+                            $((MakeCharDiv("", "#FFFFFF")))
+                                    .appendTo("#game")
+                                    .draggable({cursor: "move", grid: [1, 1], containment: ".sdkj-dragplace"});
+                            sdkj.color = RandomColor();
+                            break;
+                        case 46:    // delete => delete last char
+                            $("#game > div").last().remove();
+                            break;
+                        case 16:    // shift => nothing
+                        case 20:    // tab
+                            break;
+                        default:    // show the char
+                            var char = String.fromCharCode(event.keyCode);
+                            $((MakeCharDiv(char, sdkj.color)))
+                                    .appendTo("#game")
+                                    .draggable({cursor: "move", grid: [1, 1], containment: ".sdkj-dragplace"});
+                    }
+                });
+                $("#play").click(function (event) {
+                    var offset = $("#game").offset();
+                    var width = $("#game").width();
+                    var height = $("#game").height();
+                    $("#game > div").each(function () {
+                        $(this).offset({top: offset.top + Math.floor(height * Math.random()),
+                            left: offset.left + Math.floor(width * Math.random())});
+                        console.log($(this).offset().left + " " + $(this).offset().top);
+                    });
+                });
+            });
+            function RandomHex() {
+                var hex = (56 + Math.floor(200 * Math.random())).toString(16);
+                if (hex.length === 1)
+                    hex = "0" + hex;
+                return hex;
+            }
+            function RandomColor() {
+                return "#" + RandomHex() + RandomHex() + RandomHex();
+            }
+            function MakeCharDiv(char, color) {
+                if(!color) color = RandomColor();
+                if(!char) char = "";
+                return "<div class='sdkj-draggable' style=" 
+                + "'background-color:" + color 
+                + ";border-color:" + color +"'>" + char + "</div>"
+            }
+        </script>
+    </head>
+    <body>
+        <section>
+            <div style="max-width: 800px; margin: auto">
+                <button id="play">DISTRIBUE</button>
+            </div>
+        </section>
+        <section title="game" id="game" class="sdkj-dragplace">
+        </section>
+    </body>
+</html>
